@@ -1,4 +1,4 @@
-package com.example.imageviewer;
+package com.example.myapplication;
 
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -18,23 +18,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+        setContentView(R.layout.activity_main); // <-- should NOT be red
 
         imageView = findViewById(R.id.imageView);
         btnChangeImage = findViewById(R.id.btnChangeImage);
         btnResize = findViewById(R.id.btnResize);
 
-        // Change Image
         btnChangeImage.setOnClickListener(v -> {
             if (isImage1) {
-                imageView.setImageResource(R.drawable.image2);
+                imageView.setImageResource(R.drawable.ic_launcher_background);
             } else {
-                imageView.setImageResource(R.drawable.image1);
+                imageView.setImageResource(R.drawable.ic_launcher_foreground);
             }
             isImage1 = !isImage1;
         });
 
-        // Change Dimensions
         btnResize.setOnClickListener(v -> {
             ViewGroup.LayoutParams params = imageView.getLayoutParams();
 
