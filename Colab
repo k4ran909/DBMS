@@ -1,0 +1,26 @@
+from google.colab import files
+uploaded = files.upload()
+
+
+
+
+import pandas as pd
+df = pd.read_csv('your_file_name.csv')
+df.head()
+
+
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load dataset
+df = pd.read_csv("placement.csv")
+
+# Scatter plot
+plt.scatter(df['cgpa'], df['package'])
+plt.xlabel("CGPA")
+plt.ylabel("Package")
+plt.title("CGPA vs Package")
+plt.show()
+
