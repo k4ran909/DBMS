@@ -1,49 +1,74 @@
 #!/bin/bash
 
 clear
+
 echo "======================================="
 echo "   O3DN Browser VPS Installer 🚀"
 echo "======================================="
 
-# Ask browser choice
-echo ""
-echo "Select browser to install:"
-echo "1) Chromium"
-echo "2) Brave"
-read -p "Enter choice (1 or 2): " choice
+# Root check
+if [ "$EUID" -ne 0 ]; then
+  echo "❌ Please run as root"
+  exit 1
+fi
 
 # Install Docker if not installed
 if ! command -v docker &> /dev/null
 then
     echo "[+] Installing Docker..."
     curl -fsSL https://get.docker.com | sh
+else
+    echo "[✓] Docker already installed"
 fi
 
-# Stop old container if exists
+# Remove old container
 docker rm -f browser 2>/dev/null
 
-# Ask credentials
-read -p "Enter username: " USERNAME
-read -p "Enter password: " PASSWORD
+# Browser selection (FIXED INPUT)
+echo ""
+echo "Select browser to install:"
+echo "1) Chromium"
+echo "2) Brave"
+echo "3) Firefox"
 
-# Timezone auto detect (fallback)
-TZ=$(timedatectl | grep "Time zone" | awk '{print $3}')
+while true; do
+  read -p "Enter choice (1/2/3): " choice
+  case $choice in
+    1)
+      IMAGE="lscr.io/linuxserver/chromium:latest"
+      NAME="Chromium"
+      break
+      ;;
+    2)
+      IMAGE="lscr.io/linuxserver/brave:latest"
+      NAME="Brave"
+      break
+      ;;
+    3)
+      IMAGE="lscr.io/linuxserver/firefox:latest"
+      NAME="Firefox"
+      break
+      ;;
+    *)
+      echo "❌ Invalid choice. Try again."
+      ;;
+  esac
+done
+
+# Credentials input
+echo ""
+read -p "Enter username: " USERNAME
+read -s -p "Enter password: " PASSWORD
+echo ""
+
+# Timezone detect
+TZ=$(timedatectl 2>/dev/null | grep "Time zone" | awk '{print $3}')
 TZ=${TZ:-Etc/UTC}
 
-# Choose image
-if [ "$choice" == "1" ]; then
-    IMAGE="lscr.io/linuxserver/chromium:latest"
-    NAME="Chromium"
-elif [ "$choice" == "2" ]; then
-    IMAGE="lscr.io/linuxserver/brave:latest"
-    NAME="Brave"
-else
-    echo "Invalid choice!"
-    exit 1
-fi
+echo ""
+echo "[+] Deploying $NAME browser..."
 
-echo "[+] Installing $NAME browser..."
-
+# Run container
 docker run -d \
   --name=browser \
   --security-opt seccomp=unconfined \
@@ -58,6 +83,7 @@ docker run -d \
   --restart unless-stopped \
   $IMAGE
 
+# Get public IP
 IP=$(curl -s ifconfig.me)
 
 echo ""
@@ -67,5 +93,5 @@ echo "======================================="
 echo "🌐 Access your browser:"
 echo "https://$IP:3001"
 echo ""
-echo "⚠️ Accept SSL warning in browser"
+echo "⚠️ Accept SSL warning (self-signed cert)"
 echo "======================================="
